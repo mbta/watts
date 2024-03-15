@@ -8,13 +8,7 @@ defmodule WebApi do
   plug(:dispatch)
 
   post "/tts" do
-    %{"text" => text, "lang" => lang} = conn.body_params
-
-    voice_id =
-      case lang do
-        "en-US" -> "Matthew"
-        "es-US" -> "Pedro"
-      end
+    %{"text" => text, "voice_id" => voice_id} = conn.body_params
 
     key =
       Jason.encode!([text, voice_id])
@@ -28,7 +22,7 @@ defmodule WebApi do
 
     case AWS.S3.get_object(client, bucket, key) do
       {:ok, %{"Body" => audio}, _} ->
-        Logger.info("cache_hit: text=#{inspect(text)} lang=#{lang} key=#{key}")
+        Logger.info("cache_hit: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
         conn = send_resp(conn, 200, audio)
 
         # Copy the object to itself, which updates the timestamp, so we only expire files
@@ -54,7 +48,7 @@ defmodule WebApi do
                receive_body_as_binary?: true
              ) do
           {:ok, %{"Body" => audio, "ContentType" => content_type}, _} ->
-            Logger.info("tts_generation: text=#{inspect(text)} lang=#{lang} key=#{key}")
+            Logger.info("tts_generation: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
             conn = send_resp(conn, 200, audio)
 
             {:ok, _, _} =
@@ -66,7 +60,7 @@ defmodule WebApi do
             conn
 
           {:error, {:unexpected_response, %{status_code: 400, body: body}}} ->
-            Logger.info("tts_error: text=#{inspect(text)} lang=#{lang} key=#{key}")
+            Logger.info("tts_error: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
             send_resp(conn, 400, body)
         end
     end

@@ -1,0 +1,16 @@
+# Whether to perform real TTS generation. Optional. Leave unset to stub out calls to Polly, or
+# uncomment to perform real TTS.
+# CAUTION: Using Polly at scale could incur substantial costs, so this option should only be
+# used for small-scale local testing.
+# export WATTS_ENABLE_POLLY=true
+
+# Access key for allowing API calls. Required. Generate a unique random string for local use.
+# export WATTS_API_KEY=
+
+# Bucket to use for caching audio files. Required.
+export WATTS_BUCKET=mbta-audio-service-test
+
+# AWS credentials. Required.
+# export AWS_ACCESS_KEY_ID=
+# export AWS_SECRET_ACCESS_KEY=
+export AWS_DEFAULT_REGION=us-east-1

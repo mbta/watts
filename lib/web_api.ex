@@ -66,6 +66,16 @@ defmodule WebApi do
     end
   end
 
+  get "/_health" do
+    send_resp(conn, 200, "")
+  end
+
+  match _ do
+    send_resp(conn, 404, "Not found")
+  end
+
+  defp enforce_api_key(%Plug.Conn{path_info: ["_health"]} = conn, _opts), do: conn
+
   defp enforce_api_key(conn, _opts) do
     api_key =
       Enum.find_value(conn.req_headers, fn {key, value} -> if(key == "x-api-key", do: value) end)

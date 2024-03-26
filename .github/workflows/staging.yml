@@ -1,0 +1,17 @@
+name: Deploy to staging
+
+on:
+  push:
+    branches: main
+  workflow_dispatch:
+
+jobs:
+  call-workflow:
+    uses: mbta/workflows/.github/workflows/deploy-ecs.yml@v2
+    with:
+      app-name: watts
+      environment: staging
+    secrets:
+      aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
+      docker-repo: ${{ secrets.DOCKER_REPO }}
+      slack-webhook: ${{ secrets.SLACK_WEBHOOK }}

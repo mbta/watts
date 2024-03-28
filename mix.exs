@@ -20,6 +20,8 @@ defmodule Watts.MixProject do
 
   defp deps do
     [
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:lcov_ex, "~> 0.3", only: [:dev, :test], runtime: false},
       {:bandit, "~> 1.0"},
       {:jason, "~> 1.4"},
       {:aws, "~> 0.14"},

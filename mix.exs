@@ -7,7 +7,8 @@ defmodule Watts.MixProject do
       version: "0.1.0",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: LcovEx]
     ]
   end
 
@@ -20,6 +21,8 @@ defmodule Watts.MixProject do
 
   defp deps do
     [
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:lcov_ex, "~> 0.3", only: [:dev, :test], runtime: false},
       {:bandit, "~> 1.0"},
       {:jason, "~> 1.4"},
       {:aws, "~> 0.14"},

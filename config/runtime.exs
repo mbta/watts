@@ -6,7 +6,6 @@ if config_env() != :test do
 
   config :watts,
     api_key: api_key,
-    polly_module:
-      if(System.get_env("WATTS_ENABLE_POLLY") == "true", do: AWS.Polly, else: PollyStub),
+    enable_polly: System.get_env("WATTS_ENABLE_POLLY") == "true",
     s3_bucket: System.get_env("WATTS_BUCKET")
 end

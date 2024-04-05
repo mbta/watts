@@ -16,50 +16,45 @@ defmodule WebApi do
       |> Base.url_encode64()
       |> then(&("audio_cache/" <> &1))
 
-    client = AWS.Client.create()
     bucket = Application.get_env(:watts, :s3_bucket)
-    polly_module = Application.get_env(:watts, :polly_module)
 
-    case AWS.S3.get_object(client, bucket, key) do
-      {:ok, %{"Body" => audio}, _} ->
+    case ExAws.S3.get_object(bucket, key) |> ExAws.request() do
+      {:ok, %{body: audio}} ->
         Logger.info("cache_hit: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
         conn = send_resp(conn, 200, audio)
 
         # Copy the object to itself, which updates the timestamp, so we only expire files
         # that haven't been used in a while
-        {:ok, _, _} =
-          AWS.S3.copy_object(client, bucket, key, %{
-            "CopySource" => URI.encode("#{bucket}/#{key}"),
-            "MetadataDirective" => "REPLACE"
-          })
+        {:ok, _} =
+          ExAws.S3.put_object_copy(bucket, key, bucket, key, metadata_directive: :REPLACE)
+          |> ExAws.request()
 
         conn
 
-      {:error, {:unexpected_response, %{status_code: 404}}} ->
-        case polly_module.synthesize_speech(
-               client,
-               %{
-                 "Engine" => "neural",
-                 "OutputFormat" => "mp3",
-                 "Text" => text,
-                 "TextType" => "ssml",
-                 "VoiceId" => voice_id
-               },
-               receive_body_as_binary?: true
-             ) do
-          {:ok, %{"Body" => audio, "ContentType" => content_type}, _} ->
+      {:error, {:http_error, 404, _}} ->
+        if Application.get_env(:watts, :enable_polly) do
+          ExAws.Polly.synthesize_speech(text,
+            voice_id: voice_id,
+            engine: "neural",
+            text_type: "ssml",
+            output_format: "mp3"
+          )
+          |> ExAws.request()
+        else
+          {:ok, %{body: " "}}
+        end
+        |> case do
+          {:ok, %{body: audio}} ->
             Logger.info("tts_generation: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
             conn = send_resp(conn, 200, audio)
 
-            {:ok, _, _} =
-              AWS.S3.put_object(client, bucket, key, %{
-                "Body" => audio,
-                "ContentType" => content_type
-              })
+            {:ok, _} =
+              ExAws.S3.put_object(bucket, key, audio, content_type: "audio/mpeg")
+              |> ExAws.request()
 
             conn
 
-          {:error, {:unexpected_response, %{status_code: 400, body: body}}} ->
+          {:error, {:http_error, 400, %{body: body}}} ->
             Logger.info("tts_error: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
             send_resp(conn, 400, body)
         end

@@ -25,7 +25,9 @@ defmodule Watts.MixProject do
       {:lcov_ex, "~> 0.3", only: [:dev, :test], runtime: false},
       {:bandit, "~> 1.0"},
       {:jason, "~> 1.4"},
-      {:aws, "~> 0.14"},
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:ex_aws_polly, "~> 0.5"},
       {:hackney, "~> 1.20"}
     ]
   end

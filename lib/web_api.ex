@@ -41,7 +41,8 @@ defmodule WebApi do
           )
           |> ExAws.request()
         else
-          {:ok, %{body: " "}}
+          body = :code.priv_dir(:watts) |> Path.join("static.mp3") |> File.read!()
+          {:ok, %{body: body}}
         end
         |> case do
           {:ok, %{body: audio}} ->

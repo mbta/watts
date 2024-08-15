@@ -8,7 +8,7 @@
 # export WATTS_API_KEY=
 
 # Bucket to use for caching audio files. Required.
-export WATTS_BUCKET=mbta-audio-service-test
+export WATTS_BUCKET=mbta-watts-staging
 
 # AWS credentials. Required.
 # export AWS_ACCESS_KEY_ID=

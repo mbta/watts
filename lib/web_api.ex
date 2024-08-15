@@ -36,6 +36,7 @@ defmodule WebApi do
           ExAws.Polly.synthesize_speech(text,
             voice_id: voice_id,
             engine: "neural",
+            lexicon_names: ["mbtalexicon"],
             text_type: "ssml",
             output_format: "mp3"
           )

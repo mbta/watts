@@ -26,7 +26,10 @@ defmodule WebApi do
         # Copy the object to itself, which updates the timestamp, so we only expire files
         # that haven't been used in a while
         {:ok, _} =
-          ExAws.S3.put_object_copy(bucket, key, bucket, key, metadata_directive: :REPLACE)
+          ExAws.S3.put_object_copy(bucket, key, bucket, key,
+            metadata_directive: :REPLACE,
+            meta: [{:text, text}]
+          )
           |> ExAws.request()
 
         conn
@@ -51,7 +54,10 @@ defmodule WebApi do
             conn = send_resp(conn, 200, audio)
 
             {:ok, _} =
-              ExAws.S3.put_object(bucket, key, audio, content_type: "audio/mpeg")
+              ExAws.S3.put_object(bucket, key, audio,
+                content_type: "audio/mpeg",
+                meta: [{:text, text}]
+              )
               |> ExAws.request()
 
             conn

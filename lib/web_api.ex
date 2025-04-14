@@ -28,7 +28,7 @@ defmodule WebApi do
 
     case ExAws.S3.get_object(bucket, key) |> @ex_aws.request() do
       {:ok, %{body: audio}} ->
-        Logger.info("cache_hit: #{log_string}")
+        Logger.info("event=cache_hit #{log_string}")
         conn = send_resp(conn, 200, audio)
 
         # Copy the object to itself, which updates the timestamp, so we only expire files
@@ -59,7 +59,7 @@ defmodule WebApi do
         end
         |> case do
           {:ok, %{body: audio}} ->
-            Logger.info("tts_generation: #{log_string}")
+            Logger.info("event=tts_generation #{log_string}")
             conn = send_resp(conn, 200, audio)
 
             {:ok, _} =
@@ -77,7 +77,7 @@ defmodule WebApi do
             conn
 
           {:error, {:http_error, 400, %{body: body}}} ->
-            Logger.info("tts_error: #{log_string}")
+            Logger.info("event=tts_error #{log_string}")
 
             send_resp(conn, 400, body)
         end

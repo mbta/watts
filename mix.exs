@@ -30,7 +30,7 @@ defmodule Watts.MixProject do
       {:ex_aws_s3, "~> 2.5"},
       {:ex_aws_polly, "~> 0.5"},
       {:hackney, "~> 1.20"},
-      {:mox, "~> 1.2"}
+      {:mox, "~> 1.2", only: [:test]}
     ]
   end
 end

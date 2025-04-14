@@ -27,7 +27,7 @@ the value specified in the `WATTS_API_KEY` environment variable.
 
 Example request, using `curl` and a local development instance of the app:
 
-    curl localhost:4000/tts \
+    curl localhost:4005/tts \
       --output voice.mp3 \
       --header "x-api-key: your_api_key_here" \
       --json '{"voice_id": "Matthew", "text": "<speak>Your text here.</speak>"}'

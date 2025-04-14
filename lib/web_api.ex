@@ -2,6 +2,8 @@ defmodule WebApi do
   use Plug.Router
   require Logger
 
+  @ex_aws Application.compile_env!(:watts, :ex_aws_module)
+
   plug(Plug.Parsers, parsers: [{:json, json_decoder: Jason}])
   plug(:match)
   plug(:enforce_api_key)
@@ -9,18 +11,24 @@ defmodule WebApi do
 
   post "/tts" do
     %{"text" => text, "voice_id" => voice_id} = conn.body_params
+    output_format = Map.get(conn.body_params, "output_format", "mp3")
 
+    # CAUTION: Changing the cache key may result in a large number of calls to Polly, which
+    # can be costly. Be mindful of any changes made here.
     key =
-      Jason.encode!([text, voice_id])
+      Jason.encode!(%{text: text, voice_id: voice_id, output_format: output_format})
       |> then(&:crypto.hash(:md5, &1))
       |> Base.url_encode64()
       |> then(&("audio_cache/" <> &1))
 
     bucket = Application.get_env(:watts, :s3_bucket)
 
-    case ExAws.S3.get_object(bucket, key) |> ExAws.request() do
+    log_string =
+      "text=#{inspect(text)} voice_id=#{voice_id} output_format=#{output_format} key=#{key}"
+
+    case ExAws.S3.get_object(bucket, key) |> @ex_aws.request() do
       {:ok, %{body: audio}} ->
-        Logger.info("cache_hit: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
+        Logger.info("cache_hit: #{log_string}")
         conn = send_resp(conn, 200, audio)
 
         # Copy the object to itself, which updates the timestamp, so we only expire files
@@ -30,7 +38,7 @@ defmodule WebApi do
             metadata_directive: :REPLACE,
             meta: [{:text, text}]
           )
-          |> ExAws.request()
+          |> @ex_aws.request()
 
         conn
 
@@ -41,29 +49,36 @@ defmodule WebApi do
             engine: "neural",
             lexicon_names: ["mbtalexicon"],
             text_type: "ssml",
-            output_format: "mp3"
+            output_format: output_format
           )
-          |> ExAws.request()
+          |> @ex_aws.request()
         else
-          body = :code.priv_dir(:watts) |> Path.join("static.mp3") |> File.read!()
+          filename = if(output_format == "mp3", do: "static.mp3", else: "static.pcm")
+          body = :code.priv_dir(:watts) |> Path.join(filename) |> File.read!()
           {:ok, %{body: body}}
         end
         |> case do
           {:ok, %{body: audio}} ->
-            Logger.info("tts_generation: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
+            Logger.info("tts_generation: #{log_string}")
             conn = send_resp(conn, 200, audio)
 
             {:ok, _} =
               ExAws.S3.put_object(bucket, key, audio,
-                content_type: "audio/mpeg",
+                content_type:
+                  case output_format do
+                    "mp3" -> "audio/mpeg"
+                    "pcm" -> "audio/pcm"
+                    _ -> "application/octet-stream"
+                  end,
                 meta: [{:text, text}]
               )
-              |> ExAws.request()
+              |> @ex_aws.request()
 
             conn
 
           {:error, {:http_error, 400, %{body: body}}} ->
-            Logger.info("tts_error: text=#{inspect(text)} voice_id=#{voice_id} key=#{key}")
+            Logger.info("tts_error: #{log_string}")
+
             send_resp(conn, 400, body)
         end
     end

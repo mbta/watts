@@ -8,6 +8,7 @@ defmodule Watts.MixProject do
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      elixirc_paths: ["lib"] ++ if(Mix.env() == :test, do: ["test_support"], else: []),
       test_coverage: [tool: LcovEx]
     ]
   end
@@ -28,7 +29,8 @@ defmodule Watts.MixProject do
       {:ex_aws, "~> 2.5"},
       {:ex_aws_s3, "~> 2.5"},
       {:ex_aws_polly, "~> 0.5"},
-      {:hackney, "~> 1.20"}
+      {:hackney, "~> 1.20"},
+      {:mox, "~> 1.2"}
     ]
   end
 end

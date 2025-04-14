@@ -21,13 +21,18 @@ changes while the server is running, use the `recompile` command in IEx.
 
 ## API
 
-The main API endpoint is `/tts`, which accepts JSON POST requests containing
-`voice_id` and `text` fields. An `x-api-key` HTTP header must also be set to
-the value specified in the `WATTS_API_KEY` environment variable.
+The main API endpoint is `/tts`, which accepts JSON POST requests with the
+following parameters:
+* `text` - The text to generate, in SSML format. Required.
+* `voice_id` - The id of the Polly voice to use. Required.
+* `output_format` - The format to return. Defaults to `mp3`
+
+An `x-api-key` HTTP header must also be set to the value specified in the
+`WATTS_API_KEY` environment variable.
 
 Example request, using `curl` and a local development instance of the app:
 
-    curl localhost:4000/tts \
+    curl localhost:4005/tts \
       --output voice.mp3 \
       --header "x-api-key: your_api_key_here" \
       --json '{"voice_id": "Matthew", "text": "<speak>Your text here.</speak>"}'

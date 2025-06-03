@@ -16,7 +16,7 @@ FROM alpine:${ALPINE_VERSION}
 
 WORKDIR /root
 COPY --from=build /root/_build/prod/rel/watts /watts
-RUN apk add --no-cache libssl1.1 dumb-init libstdc++ libgcc ncurses-libs
+RUN apk add --no-cache libssl3 dumb-init libstdc++ libgcc ncurses-libs
 
 ENV TERM=xterm LANG=C.UTF-8 ERL_CRASH_DUMP_SECONDS=0
 

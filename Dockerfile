@@ -12,11 +12,11 @@ RUN apk add --no-cache git && \
     MIX_ENV=prod mix release
 
 # The one the elixir image was built with
-FROM alpine:${ALPINE_VERSION}
+FROM hexpm/erlang:${ERLANG_VERSION}-alpine-${ALPINE_VERSION}
 
 WORKDIR /root
 COPY --from=build /root/_build/prod/rel/watts /watts
-RUN apk add --no-cache libssl1.1 dumb-init libstdc++ libgcc ncurses-libs
+RUN apk add --no-cache dumb-init
 
 ENV TERM=xterm LANG=C.UTF-8 ERL_CRASH_DUMP_SECONDS=0
 

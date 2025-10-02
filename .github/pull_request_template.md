@@ -1,3 +1,3 @@
-**Asana Ticket:** [title](url)
+**Asana Task:** [title](url)
 
 ### Summary

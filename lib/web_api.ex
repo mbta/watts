@@ -36,7 +36,7 @@ defmodule WebApi do
         {:ok, _} =
           ExAws.S3.put_object_copy(bucket, key, bucket, key,
             metadata_directive: :REPLACE,
-            meta: [{:text, text}]
+            meta: [{:text, remove_control_characters(text)}]
           )
           |> @ex_aws.request()
 
@@ -70,7 +70,7 @@ defmodule WebApi do
                     "pcm" -> "audio/pcm"
                     _ -> "application/octet-stream"
                   end,
-                meta: [{:text, Regex.replace(~r/[[:cntrl:]]/, text, "")}]
+                meta: [{:text, remove_control_characters(text)}]
               )
               |> @ex_aws.request()
 
@@ -103,5 +103,9 @@ defmodule WebApi do
     else
       conn
     end
+  end
+
+  defp remove_control_characters(text) do
+    Regex.replace(~r/[[:cntrl:]]/, text, "")
   end
 end

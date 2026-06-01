@@ -70,7 +70,7 @@ defmodule WebApi do
                     "pcm" -> "audio/pcm"
                     _ -> "application/octet-stream"
                   end,
-                meta: [{:text, text}]
+                meta: [{:text, Regex.replace(~r/[[:cntrl:]]/, text, "")}]
               )
               |> @ex_aws.request()
 

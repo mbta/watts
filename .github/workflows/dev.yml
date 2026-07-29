@@ -5,12 +5,18 @@ on:
     branches: main
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   call-workflow:
-    uses: mbta/workflows/.github/workflows/deploy-ecs.yml@v5
+    uses: mbta/workflows/.github/workflows/deploy-ecs.yml@c76e5ccd9556fbea52bc41548f7ceed5985ad775 # v5.1.0
     with:
       app-name: watts
       environment: dev
+    permissions: {
+      contents: read, # Needed to check out the repository
+      id-token: write # Needed to authenticate against AWS
+    }
     secrets:
       aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
       docker-repo: ${{ secrets.DOCKER_REPO }}

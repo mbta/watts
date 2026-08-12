@@ -5,7 +5,7 @@ defmodule Watts.MixProject do
     [
       app: :watts,
       version: "0.1.0",
-      elixir: "~> 1.17",
+      elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       elixirc_paths: ["lib"] ++ if(Mix.env() == :test, do: ["test_support"], else: []),
@@ -25,7 +25,6 @@ defmodule Watts.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:lcov_ex, "~> 0.3", only: [:dev, :test], runtime: false},
       {:bandit, "~> 1.0"},
-      {:jason, "~> 1.4"},
       {:ex_aws, "~> 2.5"},
       {:ex_aws_s3, "~> 2.5"},
       {:ex_aws_polly, "~> 0.5"},

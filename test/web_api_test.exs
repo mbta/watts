@@ -59,7 +59,7 @@ defmodule WebApiTest do
   defp make_conn(params) do
     body = Map.merge(%{text: "<speak>hello</speak>", voice_id: "Matthew"}, params)
 
-    conn(:post, "/tts", Jason.encode!(body))
+    conn(:post, "/tts", JSON.encode!(body))
     |> put_req_header("content-type", "application/json")
   end
 end

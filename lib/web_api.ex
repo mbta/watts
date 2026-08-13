@@ -4,7 +4,7 @@ defmodule WebApi do
 
   @ex_aws Application.compile_env!(:watts, :ex_aws_module)
 
-  plug(Plug.Parsers, parsers: [{:json, json_decoder: Jason}])
+  plug(Plug.Parsers, parsers: [{:json, json_decoder: JSON}])
   plug(:match)
   plug(:enforce_api_key)
   plug(:dispatch)
@@ -16,7 +16,7 @@ defmodule WebApi do
     # CAUTION: Changing the cache key may result in a large number of calls to Polly, which
     # can be costly. Be mindful of any changes made here.
     key =
-      Jason.encode!(%{text: text, voice_id: voice_id, output_format: output_format})
+      JSON.encode!(%{text: text, voice_id: voice_id, output_format: output_format})
       |> then(&:crypto.hash(:md5, &1))
       |> Base.url_encode64()
       |> then(&("audio_cache/" <> &1))
